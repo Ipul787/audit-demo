@@ -22,12 +22,12 @@ const db = mysql.createPool({
   database: 'db_react'
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const { email, username, password } = req.body;
   if (!email || !username || !password) {
     return res.status(400).send('All fields are required');
   }
-  const hashedPassword = bcrypt.hashSync(password, 8);
+  const hashedPassword = await bcrypt.hash(password, 8);
 
   const sql = 'INSERT INTO user (email, username, password) VALUES (?, ?, ?)';
   db.query(sql, [email, username, hashedPassword], (err, result) => {
@@ -55,6 +55,11 @@ app.post('/login', (req, res) => {
 
     const user = results[0];
     console.log('Fetched user:', user);
+    /*const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Password valid:', isPasswordValid);
+    if (!isPasswordValid) {
+        return res.status(401).send('Invalid password');
+    }*/
 
     if (user) {
       const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '24h' });

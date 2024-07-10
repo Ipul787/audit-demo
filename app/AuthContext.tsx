@@ -6,6 +6,7 @@ type AuthContextType = {
   userToken: string | null;
   login: (username: string, password: string) => void;
   register: (email: string, username: string, password: string) => void;
+  update: (email: string, newPassword: string) => void;
   logout: () => void;
 };
   
@@ -28,7 +29,16 @@ type AuthContextType = {
     const register = async (email: string, username: string, password: string) => {
       try {
         await axios.post('http://10.0.2.2:3000/register', { email, username, password });
-        await login(username, password);
+        console.log('User registered successfully');
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const update = async (email: string, newPassword: string) => {
+      try {
+        await axios.post('http://10.0.2.2:3000/reset-password', { email, newPassword });
+        console.log('Password changed succcessfully');
       } catch (error) {
         console.error(error);
       }
@@ -50,7 +60,7 @@ type AuthContextType = {
     }, []);
   
     return (
-      <AuthContext.Provider value={{ userToken, login, register, logout }}>
+      <AuthContext.Provider value={{ userToken, login, register, update, logout }}>
         {children}
       </AuthContext.Provider>
     );

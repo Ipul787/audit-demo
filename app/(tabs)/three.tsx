@@ -46,7 +46,6 @@ export default function TabThreeScreen() {
           </Table>
         </View>
       </ScrollView>
-      <EditScreenInfo path="app/(tabs)/three.tsx" />
     </View>
   );
 }

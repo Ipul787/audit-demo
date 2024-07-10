@@ -34,6 +34,9 @@ const LoginScreen = () => {
         style={styles.input}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
+      <Link href={"/screens/PasswordScreen"}>
+        <Text style={styles.link}>Forgot Password</Text>
+      </Link>
       <Button title="Login" onPress={handleLogin} />
       <View style={styles.margin}/>
       <TouchableOpacity>
