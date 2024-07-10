@@ -11,9 +11,10 @@ interface Audit {
   area: number;
   start_date: Date;
   end_date: Date;
+  user: string;
 }
 
-export default function TabTwoScreen() {
+export default function TabThreeScreen() {
 
   const [tableData, setTableData] = useState<string[][]>([]);
 
@@ -25,7 +26,8 @@ export default function TabTwoScreen() {
           audit.title, 
           audit.area.toString(), 
           new Date(audit.start_date).toDateString(), 
-          new Date(audit.end_date).toDateString()
+          new Date(audit.end_date).toDateString(), 
+          audit.user
         ]);
         setTableData(data);
       })
@@ -39,7 +41,7 @@ export default function TabTwoScreen() {
       <ScrollView horizontal={true}>
         <View>
           <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9', flexDirection: 'column' }}>
-            <Row data={['ID', 'Title', 'Area', 'Start', 'End']} style={styles.header} textStyle={styles.headerText}/>
+            <Row data={['ID', 'Title', 'Area', 'Start', 'End', 'User']} style={styles.header} textStyle={styles.headerText}/>
             <Rows data={tableData} textStyle={styles.text}/>
           </Table>
         </View>

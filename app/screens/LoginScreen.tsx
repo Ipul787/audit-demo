@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { Link } from 'expo-router';
 
@@ -12,7 +11,7 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      await login(username, password);
+      login(username, password);
     } catch (err) {
       console.error('Login error:', err);
       setError('Invalid credentials');

@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getTokenFromStorage, saveTokenToStorage, removeTokenFromStorage } from './storage';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type AuthContextType = {
   userToken: string | null;
@@ -20,7 +19,7 @@ type AuthContextType = {
         const response = await axios.post('http://10.0.2.2:3000/login', { username, password });
         const token = response.data.token;
         setUserToken(token);
-        await AsyncStorage.setItem('userToken', token);
+        await saveTokenToStorage(token);
       } catch (error) {
         console.error(error);
       }

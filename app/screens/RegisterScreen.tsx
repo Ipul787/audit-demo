@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
-import axios from 'axios';
 import { useAuth } from '../AuthContext';
 
 const RegisterScreen = () => {
@@ -12,7 +11,7 @@ const RegisterScreen = () => {
 
     const handleRegister = async () => {
         try {
-        await register(email, username, password);
+        register(email, username, password);
         } catch (err) {
         setError('Registration failed');
         }

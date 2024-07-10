@@ -4,15 +4,15 @@ import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import { useAuth } from '../AuthContext';
 
-export default function TabTwoScreen() {
+export default function TabFourScreen() {
   const { logout } = useAuth();
 
   const handleLogout = async () => {
-    await logout();
+    logout();
   };
   return (
     <View style={styles.container}>
-      <Button title="Logout" onPress={handleLogout} />
+      <Button title="Logout" onPress={handleLogout}/>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="app/(tabs)/four.tsx" />
     </View>

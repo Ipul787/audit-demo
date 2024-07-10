@@ -3,8 +3,10 @@ import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import DropDownPicker from 'react-native-dropdown-picker';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 export default function TabTwoScreen() {
   const [open, setOpen] = useState(false);
@@ -19,15 +21,18 @@ export default function TabTwoScreen() {
     { label: 'Surabaya', value: '2'}, 
     { label: 'Jakarta', value: '3'}
   ]);
+  const { userToken } = useAuth();
+  const [username, setUsername] = useState('');
+
   const onChange1 = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || startdate;
-    setShowStartPicker(Platform.OS === 'ios'); // For iOS, show the picker again
+    setShowStartPicker(Platform.OS === 'ios');
     setStartDate(currentDate);
   };
 
   const onChange2 = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const endDate = selectedDate || enddate;
-    setShowEndPicker(Platform.OS === 'ios'); // For iOS, show the picker again
+    setShowEndPicker(Platform.OS === 'ios');
     setEndDate(endDate);
   };
 
@@ -39,6 +44,13 @@ export default function TabTwoScreen() {
     setShowEndPicker(true);
   };
 
+  useEffect(() => {
+    if (userToken) {
+      const decoded = jwtDecode(userToken);
+      setUsername(decoded.username);
+    }
+  }, [userToken]);
+
   const handleSubmit = async () => {
     try {
       const response = await axios.post('http://10.0.2.2:3000/submitData', {
@@ -46,6 +58,7 @@ export default function TabTwoScreen() {
         area: value,
         startDate: startdate.toISOString(),
         endDate: enddate.toISOString(),
+        username: username
       });
 
       if (response.status === 200) {
@@ -105,6 +118,14 @@ export default function TabTwoScreen() {
       )}
       <Text>End Date: {enddate.toDateString()}</Text>
       <View style={styles.margin}/>
+      <Text style={styles.text}>User</Text>
+      <TextInput
+        style={styles.input}
+        value={username}
+        onChangeText={setUsername}
+        placeholder="Username"
+        editable={false}
+      />
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <Button onPress={handleSubmit} title="Submit" />
     </View>

@@ -12,6 +12,7 @@ const secretKey = 'ae39fe0e33ae9ce46fbc22112a0d6d2b33cbc6df047f32343d6957e024e8f
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const db = mysql.createPool({
   connectionLimit: 10,
@@ -57,7 +58,7 @@ app.post('/login', (req, res) => {
 
     if (user) {
       const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '24h' });
-  
+      console.log('Generated token: ', token);
       res.json({ token });
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
@@ -73,42 +74,64 @@ function verifyToken(req, res, next) {
   const bearerHeader = req.headers['authorization'];
 
   if (typeof bearerHeader !== 'undefined') {
-
-    const bearer = bearerHeader.split(' ')[1];
+    const bearer = bearerHeader.split(' ');
 
     const token = bearer[1];
 
-    if (!token) return res.sendStatus(401);
+    if (!token) {
+      console.error('No token exist');
+      return res.sendStatus(401);
+    }
 
-    jwt.verify(token, secretKey, (err, authData) => {
+    req.token = token;
+
+    jwt.verify(req.token, secretKey, (err, authData) => {
       if (err) {
+        console.error('Token verification error:', err);
         return res.sendStatus(403);
       } else {
-        req.authData = authData;
+        req.user = authData;
         next();
       }
     });
   } else {
-    res.sendStatus(403);
+    console.error('No authorization header provided');
+    res.sendStatus(401);
   }
 }
 
 app.post('/reset-password', (req, res) => {
-  const { username, newPassword } = req.body;
+  const { email, newPassword } = req.body;
   const hashedPassword = bcrypt.hashSync(newPassword, 8);
 
   const sql = 'UPDATE user SET password = ? WHERE email = ?';
-  db.query(sql, [hashedPassword, username], (err, result) => {
+  db.query(sql, [hashedPassword, email], (err, result) => {
     if (err) return res.status(500).send('Server error');
     res.status(200).send('Password reset successfully');
   });
 });
 
-app.post('/submitData', (req, res) => {
-  const { title, area, startDate, endDate } = req.body;
+app.get('/api/user', verifyToken, (req, res) => {
+  const userId = req.user.username;
 
-  const sql = `INSERT INTO audit (title, area, start_date, end_date) VALUES (?, ?, ?, ?)`;
-  const values = [title, area, startDate, endDate];
+  const sql = 'SELECT email, username FROM user WHERE username = ?';
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error('Database query error:', err);
+      res.status(500).send('Error fetching user data');
+    } else if (result.length === 0) {
+      res.status(404).send('User not found');
+    } else {
+      res.json(result[0]);
+    }
+  });
+});
+
+app.post('/submitData', (req, res) => {
+  const { title, area, startDate, endDate, username } = req.body;
+
+  const sql = `INSERT INTO audit (title, area, start_date, end_date, user) VALUES (?, ?, ?, ?, ?)`;
+  const values = [title, area, startDate, endDate, username];
 
   db.query(sql, values, (err, results) => {
     if (err) {
@@ -123,7 +146,7 @@ app.post('/submitData', (req, res) => {
 });
 
 app.get('/audit', (req, res) => {
-  let sql = 'SELECT audit.audit_id, audit.title, area.area, audit.start_date, audit.end_date FROM audit JOIN area WHERE area.area_id = audit.audit_id;';
+  let sql = 'SELECT audit.audit_id, audit.title, area.area, audit.start_date, audit.end_date, audit.user FROM audit JOIN area ON area.area_id = audit.area;';
   db.query(sql, (err, results) => {
     if (err) {
       console.error(err);
